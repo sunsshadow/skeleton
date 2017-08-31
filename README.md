@@ -4,3 +4,6 @@
 skeleton
 ============
 A super simple foundation for building a scalable RESTful HTTP servers
+
+[![CircleCI](https://circleci.com/gh/sunsshadow/skeleton/tree/master.svg?style=svg)](https://circleci.com/gh/sunsshadow/skeleton/tree/master)
+
