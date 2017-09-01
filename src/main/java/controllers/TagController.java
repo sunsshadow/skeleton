@@ -27,9 +27,6 @@ public class TagController {
 
     @PUT
     public void toggleTag(@PathParam("tag") String tagName, @NotNull String receiptNumber) {
-        System.out.print("ELena tagname " + tagName  + " sup ");
-        System.out.print("ELena tagname " + receiptNumber  + " sup ");
-
         int number = Integer.parseInt(receiptNumber);
         receipts.tag(tagName, number);
     }
@@ -37,7 +34,6 @@ public class TagController {
     @GET
     public List<ReceiptResponse> getTaggedReceipts(@PathParam("tag") String tagName) {
         List<ReceiptsRecord> receiptRecords = receipts.getAllTaggedReceipts(tagName);
-        System.out.print("ELena receiptRecords " + receiptRecords.size()  + " sup ");
         return receiptRecords.stream().map(ReceiptResponse::new).collect(toList());
     }
 }
