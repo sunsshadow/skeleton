@@ -5,5 +5,11 @@ skeleton
 ============
 A super simple foundation for building a scalable RESTful HTTP servers
 
+
 [![CircleCI](https://circleci.com/gh/sunsshadow/skeleton/tree/master.svg?style=svg)](https://circleci.com/gh/sunsshadow/skeleton/tree/master)
+
+=======
+To build a docker image:
+1. Run `./gradlew distTar`
+2. Run `docker build .`
 
