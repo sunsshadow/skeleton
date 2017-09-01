@@ -36,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Receipts extends TableImpl<ReceiptsRecord> {
 
-	private static final long serialVersionUID = 1562494029;
+	private static final long serialVersionUID = 681974459;
 
 	/**
 	 * The reference instance of <code>PUBLIC.RECEIPTS</code>
@@ -70,6 +70,11 @@ public class Receipts extends TableImpl<ReceiptsRecord> {
 	 * The column <code>PUBLIC.RECEIPTS.AMOUNT</code>.
 	 */
 	public final TableField<ReceiptsRecord, BigDecimal> AMOUNT = createField("AMOUNT", org.jooq.impl.SQLDataType.DECIMAL.precision(12, 2), this, "");
+
+	/**
+	 * The column <code>PUBLIC.RECEIPTS.TAG</code>.
+	 */
+	public final TableField<ReceiptsRecord, String> TAG = createField("TAG", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "");
 
 	/**
 	 * The column <code>PUBLIC.RECEIPTS.RECEIPT_TYPE</code>.

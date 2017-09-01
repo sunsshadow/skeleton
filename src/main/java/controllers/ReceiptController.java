@@ -13,6 +13,11 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+
+/**
+ * Sample json:
+ * {"merchant":"foo","amount": 22.45}
+ */
 @Path("/receipts")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
