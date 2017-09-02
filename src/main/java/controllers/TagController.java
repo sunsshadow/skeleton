@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toList;
  * /tags/:tag
  */
 @Path("/tags/{tag}")
-@Consumes(MediaType.TEXT_PLAIN)
+@Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 @Produces(MediaType.APPLICATION_JSON)
 public class TagController {
 
