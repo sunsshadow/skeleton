@@ -4,7 +4,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/netid")
-@Produces(MediaType.TEXT_PLAIN)
+@Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
 public class NetIdController {
 
     @GET
