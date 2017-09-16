@@ -72,16 +72,12 @@ public class Receipts extends TableImpl<ReceiptsRecord> {
 	public final TableField<ReceiptsRecord, BigDecimal> AMOUNT = createField("amount", org.jooq.impl.SQLDataType.DECIMAL.precision(12, 2), this, "");
 
 	/**
-<<<<<<< HEAD
-	 * The column <code>public.receipts.receipt_type</code>.
-=======
-	 * The column <code>PUBLIC.RECEIPTS.TAG</code>.
+	 * The column <code>public.receipts.tag</code>.
 	 */
-	public final TableField<ReceiptsRecord, String> TAG = createField("TAG", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "");
+	public final TableField<ReceiptsRecord, String> TAG = createField("tag", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "");
 
 	/**
 	 * The column <code>PUBLIC.RECEIPTS.RECEIPT_TYPE</code>.
->>>>>>> Add RESTful API logic [1/1]
 	 */
 	public final TableField<ReceiptsRecord, Integer> RECEIPT_TYPE = createField("receipt_type", org.jooq.impl.SQLDataType.INTEGER, this, "");
 

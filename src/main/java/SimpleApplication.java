@@ -1,6 +1,7 @@
 import controllers.ReceiptController;
 import controllers.StaticHtmlController;
 import controllers.NetIdController;
+import controllers.NetIdController;
 import controllers.TagController;
 import dao.ReceiptDao;
 import io.dropwizard.Application;

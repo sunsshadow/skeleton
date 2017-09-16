@@ -31,7 +31,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ReceiptsRecord extends UpdatableRecordImpl<ReceiptsRecord> implements Record6<Integer, Time, String, BigDecimal, String, Integer> {
 
-	private static final long serialVersionUID = -1941296675;
+	private static final long serialVersionUID = 951362581;
 
 	/**
 	 * Setter for <code>public.receipts.id</code>.
@@ -90,17 +90,14 @@ public class ReceiptsRecord extends UpdatableRecordImpl<ReceiptsRecord> implemen
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Setter for <code>public.receipts.receipt_type</code>.
-=======
-	 * Setter for <code>PUBLIC.RECEIPTS.TAG</code>.
+	 * Setter for <code>public.receipts.tag</code>.
 	 */
 	public void setTag(String value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>PUBLIC.RECEIPTS.TAG</code>.
+	 * Getter for <code>public.receipts.tag</code>.
 	 */
 	public String getTag() {
 		return (String) getValue(4);
@@ -108,7 +105,6 @@ public class ReceiptsRecord extends UpdatableRecordImpl<ReceiptsRecord> implemen
 
 	/**
 	 * Setter for <code>PUBLIC.RECEIPTS.RECEIPT_TYPE</code>.
->>>>>>> Add RESTful API logic [1/1]
 	 */
 	public void setReceiptType(Integer value) {
 		setValue(5, value);
