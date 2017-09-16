@@ -45,7 +45,8 @@ public class ReceiptDao {
                     .execute();
         } else {
             dsl.update(RECEIPTS)
-                    .set(RECEIPTS.TAG, receiptsRecord.getTag().concat("," + tagName))
+                    .set(RECEIPTS.TAG, receiptsRecord.getTag()
+                            .concat("".equals(receiptsRecord.getTag()) ? (tagName) : ("," + tagName)))
                     .where(RECEIPTS.ID.eq(receiptNumber))
                     .execute();
         }
@@ -74,5 +75,4 @@ public class ReceiptDao {
 
         return null;
     }
-
 }
