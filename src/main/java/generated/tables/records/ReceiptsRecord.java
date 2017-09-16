@@ -104,7 +104,7 @@ public class ReceiptsRecord extends UpdatableRecordImpl<ReceiptsRecord> implemen
 	}
 
 	/**
-	 * Setter for <code>PUBLIC.RECEIPTS.RECEIPT_TYPE</code>.
+	 * Setter for <code>public.receipts.receipt_type</code>.
 	 */
 	public void setReceiptType(Integer value) {
 		setValue(5, value);
