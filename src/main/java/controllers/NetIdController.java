@@ -12,10 +12,4 @@ public class NetIdController {
     public String getNetId() {
         return "ez256";
     }
-
-    @Path("")
-    @GET
-    public String getNetIdMainPage() {
-        return "ez256";
-    }
 }

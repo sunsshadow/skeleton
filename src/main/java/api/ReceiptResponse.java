@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import generated.tables.records.ReceiptsRecord;
 
 import java.math.BigDecimal;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,21 +21,21 @@ public class ReceiptResponse {
     Integer id;
 
     @JsonProperty
-    String merchantName;
+    String merchant;
 
     @JsonProperty
-    BigDecimal value;
+    BigDecimal amount;
 
     @JsonProperty
-    Time created;
+    long time;
 
     @JsonProperty
     List<String> tags;
 
     public ReceiptResponse(ReceiptsRecord dbRecord) {
-        this.merchantName = dbRecord.getMerchant();
-        this.value = dbRecord.getAmount();
-        this.created = dbRecord.getUploaded();
+        this.merchant = dbRecord.getMerchant();
+        this.amount = dbRecord.getAmount();
+        this.time = dbRecord.getUploaded().getTime();
         this.id = dbRecord.getId();
         this.tags = toStringArray(dbRecord.getTag());
     }
@@ -44,14 +43,15 @@ public class ReceiptResponse {
     private List<String> toStringArray(final String toBeArr) {
         List<String> list = new ArrayList<>();
 
-        String[] tags = toBeArr.split(",");
+        if (!"".equals(toBeArr) && toBeArr != null) {
+            String[] tags = toBeArr.split(",");
 
-        for (String tag : tags) {
-            if (!"".equals(tag)) {
-                list.add(tag);
+            for (String tag : tags) {
+                if (!"".equals(tag)) {
+                    list.add(tag);
+                }
             }
         }
-
         return list;
     }
 }
