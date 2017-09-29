@@ -12,3 +12,6 @@
 /out
 
 .DS_Store
+
+# SECURITY ALERT! YOU SHOULD NOT COMMIT YOUR GCP SECURITY FILE!!!
+gc_api_file.json

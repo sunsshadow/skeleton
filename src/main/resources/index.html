@@ -9,20 +9,16 @@
             font-family: Helvetica, Arial
         }
         #receiptList {
-            border-top: 1px solid black;
-            border-left: 1px solid black;
             clear: both;
             width: 408px;
         }
         .receipt {
             background-color: lightpink;
-            border-bottom: 1px solid black;
             width: 100%;
         }
 
         .receipt span {
             margin: -1px;
-            border-right: 1px solid black;
             padding: 6px;
             text-align: center;
             width: 90px;
@@ -31,13 +27,11 @@
 
         .table-top {
             background-color: lightpink;
-            border-bottom: 1px solid black;
             width: 100%;
         }
 
         .table-top span {
             margin: -1px;
-            border-right: 1px solid black;
             padding: 6px;
             text-align: center;
             width: 91px;
@@ -154,9 +148,23 @@
             color: white;
             background-color: darkblue;
         }
+
+        video {
+            width: 550px;
+            height: 450px;
+            border: 1px solid black;
+        }
+
+        #vidwrap {
+            margin: 20px 0;
+        }
+
+        #start, #snapshot {
+            height: 3em;
+        }
     </style>
 
-    <script type="text/javascript">
+    <script>
         // This is the idiomatic way to ensure that JQuery does not
         // execute until the page has loaded
         $(function () {
@@ -165,7 +173,8 @@
             const tags_restful_api = api + "/tags";
             const application_json = "application/json";
             const tag_x_removal = " x";
-
+            let imageCapture;
+            let track;
 
             $.getJSON(receipts_restful_api, function (receipts) {
                 for (var idx = 0; idx < receipts.length; idx++) {
@@ -225,7 +234,50 @@
                     }
                 });
             };
-            
+
+            function attachMediaStream(mediaStream) {
+                $('video')[0].srcObject = mediaStream;
+                // Saving the track allows us to capture a photo
+                track = mediaStream.getVideoTracks()[0];
+                imageCapture = new ImageCapture(track);
+            }
+
+            function startVideo() {
+                navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
+                    .then(attachMediaStream)
+                    .catch(error => {
+                    navigator.mediaDevices.getUserMedia({video: true})
+                    .then(attachMediaStream)
+                    .catch(error => {
+                    console.log('you are fooked');
+                    })
+                    })
+            }
+            function takeSnapshot() {
+                // create a CANVAS element that is same size as the image
+                imageCapture.grabFrame()
+                    .then(img => {
+                    const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
+                $.ajax({
+                    url: "/images",
+                    type: "POST",
+                    data: base64EncodedImageData,
+                    contentType: "text/plain",
+                    success: function() {},
+                })
+                    .then(response => {
+                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+            })
+            .always(() => console.log('request complete'));
+                // For debugging, you can uncomment this to see the frame that was captured
+                // $('BODY').append(canvas);
+            });
+            }
+
             function addRow(receipt) {
                 var tagCount = receipt.tags.length;
 
@@ -317,13 +369,19 @@
                     year = formatTime.getFullYear() == now.getFullYear() ? "" :  " " + formatTime.getFullYear();
                     return day + " " + month + year + ago;
                 }
-            };
-            
-            $(`<div class="table-top"><span>Time</span><span>Merchant</span><span>$</span><span>Tags</span></div>`)
-                .appendTo($("#receiptList"));
-        });
-    </script>
+            }
 
+
+            $(function () {
+                $('#start').on('click', startVideo);
+                $('video').on('play', () => $('#snapshot').prop('disabled', false));
+                $('#snapshot').on('click', takeSnapshot);
+            });
+
+            $(`<div class="table-top"><span>Time</span><span>Merchant</span><span>$</span><span>Tags</span></div>`)
+                .appendTo($("#receiptList"))
+        })
+    </script>
 </head>
 
 <body>
@@ -340,5 +398,12 @@
     </div>
     <div id="receiptList"></div>
 </div>
+<button id="start">Start Video</button>
+<button id="snapshot" disabled="true">Take a Snapshot!</button>
+<br>
+<div id="vidwrap">
+    <video autoplay></video>
+</div>
 </body>
+
 </html>
