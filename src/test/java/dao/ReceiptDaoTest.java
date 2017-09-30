@@ -12,7 +12,7 @@ public class ReceiptDaoTest {
     @Test
     public void testRemoveElementFromReceiptRecordTag() {
         ReceiptsRecord receiptsRecord = new ReceiptsRecord(12, null,
-                "merchant", new BigDecimal(33.44), "tag1,tag2", 1);
+                "merchant", new BigDecimal(33.44), "tag1,tag2", 1, "image");
         String list = ReceiptDao.removeElementFromReceiptRecordTag(receiptsRecord, "tag2");
         assertEquals("tag1", list);
     }
