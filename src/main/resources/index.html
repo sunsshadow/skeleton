@@ -10,7 +10,7 @@
         }
         #receiptList {
             clear: both;
-            width: 408px;
+            width: 500px;
         }
         .receipt {
             background-color: lightpink;
@@ -21,7 +21,7 @@
             margin: -1px;
             padding: 6px;
             text-align: center;
-            width: 90px;
+            width: 80px;
             display: inline-block;
         }
 
@@ -34,7 +34,7 @@
             margin: -1px;
             padding: 6px;
             text-align: center;
-            width: 91px;
+            width: 80px;
             display: inline-block;
         }
 
@@ -240,6 +240,7 @@
             const tag_x_removal = " x";
             let imageCapture;
             let track;
+            var boundingBox;
 
             $.getJSON(receipts_restful_api, function (receipts) {
                 for (var idx = 0; idx < receipts.length; idx++) {
@@ -257,21 +258,28 @@
             });
             $('#save-receipt').on('click', function () {
                 console.info("save-receipt ");
+
+                const myCanvas = document.getElementById("my-canvas");
+                ///const base64EncodedImageData = myCanvas.toDataURL('image/png').split(',')[1];
+
                 var input_json = {
                     merchant: $('#merchant').val(),
                     amount: $('#amount').val()
+                    //base64EncodedImage: base64EncodedImageData
                 };
                 $.ajax({
                     url: receipts_restful_api,
                     dataType: 'json',
                     type: 'POST',
+                    indexValue: {param1:myCanvas},
                     contentType: application_json,
                     data: JSON.stringify(input_json),
                     success: function (receipt) {
                         console.info("addRow");
-                        addRow(receipt);
+                        addRow(receipt, this.indexValue.param1);
                         $('#merchant').val('');
                         $('#amount').val('');
+                        this.indexValue.param1.getContext('2d').clearRect(0, 0, this.indexValue.param1.width, this.indexValue.param1.height);
                         $('#input-amount-ui').hide();
                     },
                     error: function (jqXhr, textStatus, errorThrown) {
@@ -290,7 +298,13 @@
             $('#take-pic-cancel').on('click', function () {
                 console.info("take-pic-cancel ");
                 $('#camera-ui').hide();
+                disconnectVideo();
             });
+
+            function disconnectVideo() {
+                $('video')[0].srcObject = null;
+                imageCapture = null;
+            }
 
             $.put = function(url, data, callback, type){
                 if ( $.isFunction(data) ){
@@ -335,16 +349,20 @@
                     const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
+
+                const myCanvas = document.getElementById("my-canvas");
                 canvas.getContext('2d').drawImage(img, 0, 0);
                 const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
+                const imgVar = img;
                 $.ajax({
                     url: images_restful_api,
                     type: "POST",
                     data: base64EncodedImageData,
+                    indexValue: {param1:img, param2:myCanvas},
                     contentType: "text/plain",
-                    success: function (receiptinfo, canvas) {
+                    success: function (receiptinfo) {
                         console.info("receiptinfo" + receiptinfo);
-                        renderRecommendation(receiptinfo);
+                        renderRecommendation(receiptinfo, this.indexValue.param1, this.indexValue.param2);
                     },
                 })
 //                    .then(response => {
@@ -352,34 +370,36 @@
 //            })
             .always(() => console.log('request complete'));
                 // For debugging, you can uncomment this to see the frame that was captured
-                // $('BODY').append(canvas);
+
+                //var canvas1=document.createElement('canvas');
+                //canvas1.width=boundingBox[2];
+                //canvas1.height=boundingBox[3];
+                //canvas1.getContext('2d').drawImage(canvas, boundingBox[0],boundingBox[1], boundingBox[2], boundingBox[3]);
+                 //$('BODY').append(canvas1);
             });
             }
 
-            function renderRecommendation(receiptinfo, canvas) {
+            function renderRecommendation(receiptinfo, img, canvas2) {
                 $('#camera-ui').hide();
                 $('#merchant').val(receiptinfo.merchantName);
                 $('#amount').val(receiptinfo.amount);
                 $('#input-amount-ui').show();
+                boundingBox = receiptinfo.boundingBox;
 
-//                var canvas1=document.createElement('canvas');
-//                var ctx1=canvas1.getContext('2d');
-//                console.info("receiptinfo.boundingBox[2]" + receiptinfo.boundingBox[2]);
-//                console.info("receiptinfo.boundingBox[3]" + receiptinfo.boundingBox[3]);
-//                canvas1.width=receiptinfo.boundingBox[2];
-//                canvas1.height=receiptinfo.boundingBox[3];
-//                // use the extended from of drawImage to draw the
-//                // cropped area to the temp canvas
-//                canvas1.getContext('2d').drawImage(canvas, receiptinfo.boundingBox[0],receiptinfo.boundingBox[1], receiptinfo.boundingBox[2], receiptinfo.boundingBox[3]);
+                //canvas2.getContext('2d').drawImage(img, boundingBox[0],boundingBox[1], boundingBox[2], boundingBox[3]);
+                canvas2.getContext('2d').clearRect(0, 0, canvas2.width, canvas2.height);
+                canvas2.width = receiptinfo.boundingBox[2]
+                canvas2.height = receiptinfo.boundingBox[3]
+                canvas2.getContext('2d').drawImage(img,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
                 //ctx1.getContext('2d').drawImage(canvas,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
 
-              //  $('BODY').append(canvas1);
+               // $('BODY').append(canvas2);
             }
 
-            function addRow(receipt) {
+            function addRow(receipt, canvas) {
                 var tagCount = receipt.tags.length;
 
-                manageTagsAndDivs(receipt, tagCount);
+                manageTagsAndDivs(receipt, tagCount, canvas);
 
                 for (var idx = 0; idx < tagCount; idx++) {
                     var tag = $('#' + receipt.id + "sep" + idx);
@@ -425,7 +445,7 @@
                 possibleTag.remove();
             }
 
-            function manageTagsAndDivs(receipt, tagCount) {
+            function manageTagsAndDivs(receipt, tagCount, canvas) {
                 var tagBlob = "";
                 var tagCount = receipt.tags.length;
                 if (receipt.tags) {
@@ -435,8 +455,8 @@
                 }
                 console.info("receipt.merchant " + receipt.merchant);
                 console.info("receipt.amount " + receipt.amount);
-
                 $(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span></div>`)
+                //$(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span><span class="snap">${canvas}</span></div>`)
                     .appendTo($("#receiptList"));
             }
 
@@ -477,7 +497,7 @@
             });
 
             //<img src="snap.png" height="30"/>
-
+            // $(`<div class="table-top"><span>Time</span><span>Merchant</span><span>$</span><span>Tags</span><span>Snaps</span></div>`)
             $(`<div class="table-top"><span>Time</span><span>Merchant</span><span>$</span><span>Tags</span></div>`)
                 .appendTo($("#receiptList"))
         })
@@ -492,6 +512,7 @@
     <div id="input-amount-ui">
         <input id="merchant" type="text" placeholder="merchant">
         <input id="amount" type="number" placeholder="amount">
+        <canvas id="my-canvas" width="200" height="100"></canvas>
         <div class="button-holder">
             <div id="cancel-receipt">cancel</div>
             <div id="save-receipt">save</div>
