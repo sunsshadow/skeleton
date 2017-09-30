@@ -2,6 +2,7 @@ package api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import generated.tables.records.ReceiptsRecord;
+import org.jvnet.hk2.annotations.Optional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,12 +33,17 @@ public class ReceiptResponse {
     @JsonProperty
     List<String> tags;
 
+    @JsonProperty
+    @Optional
+    String image;
+
     public ReceiptResponse(ReceiptsRecord dbRecord) {
         this.merchant = dbRecord.getMerchant();
         this.amount = dbRecord.getAmount();
         this.time = dbRecord.getUploaded().getTime();
         this.id = dbRecord.getId();
         this.tags = toStringArray(dbRecord.getTag());
+        this.image = dbRecord.getImage();
     }
 
     private List<String> toStringArray(final String toBeArr) {

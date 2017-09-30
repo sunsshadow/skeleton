@@ -13,9 +13,13 @@ public class ReceiptSuggestionResponse {
     @JsonProperty
     public final BigDecimal amount;
 
+    @JsonProperty
+    public final int[] boundingBox;
 
-    public ReceiptSuggestionResponse(String merchantName, BigDecimal amount) {
+
+    public ReceiptSuggestionResponse(String merchantName, BigDecimal amount, int[] box) {
         this.merchantName = merchantName;
         this.amount = amount;
+        this.boundingBox = box;
     }
 }

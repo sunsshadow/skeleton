@@ -6,6 +6,7 @@ CREATE TABLE receipts (
   amount DECIMAL(12,2),
   tag VARCHAR(255),
   receipt_type INT UNSIGNED,
+  image LONGVARCHAR(MAX),
 
   PRIMARY KEY (id)
 );

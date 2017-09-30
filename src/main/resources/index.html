@@ -82,14 +82,48 @@
             background: inherit;
         }
 
+        #camera-ui {
+            margin-top: -4px;
+            margin-bottom: 15px;
+            width: 408px;
+            border: 1px solid black;
+            position: relative;
+            display: none;
+            background: darkmagenta;
+        }
+        #camera-ui input {
+            margin-bottom: 10px;
+            margin-left: 22px;
+            padding-left: 10px;
+            border: 1px solid black;
+            font-size: 20px;
+            height: 30px;
+            width: 88%;
+            color: white;
+            background: inherit;
+        }
+
         .button-holder {
             margin-top: 10px;
             margin-bottom: 25px;
             margin-left: 180px;
         }
         #add-receipt {
-            margin-left: 140px;
-            margin-top: 25px;
+            display: inline-block;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid black;
+            border-radius: 5px;
+            width: 100px;
+            height: 30px;
+            vertical-align: middle;
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            background-color: darkmagenta;
+        }
+
+        #start-camera {
             display: inline-block;
             cursor: pointer;
             text-align: center;
@@ -134,6 +168,36 @@
             background-color: darkblue;
         }
 
+        #take-pic {
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+            width: 100px;
+            height: 30px;
+            vertical-align: middle;
+            border-radius: 5px;
+            display: inline-table;
+            line-height: 50px;
+            border: 1px solid black;
+            color: white;
+            background-color: deeppink;
+        }
+
+        #take-pic-cancel {
+            text-align: center;
+            border: 1px solid black;
+            font-size: 24px;
+            display: inline-table;
+            cursor: pointer;
+            line-height: 50px;
+            vertical-align: middle;
+            width: 100px;
+            height: 30px;
+            border-radius: 5px;
+            color: white;
+            background-color: darkblue;
+        }
+
         .tagValue {
             margin-bottom: 5px;
             border-radius: 50px;
@@ -150,8 +214,8 @@
         }
 
         video {
-            width: 550px;
-            height: 450px;
+            width: 300px;
+            height: 300px;
             border: 1px solid black;
         }
 
@@ -168,9 +232,10 @@
         // This is the idiomatic way to ensure that JQuery does not
         // execute until the page has loaded
         $(function () {
-            const api = "";
+            const api = "http://localhost:8080";
             const receipts_restful_api = api + "/receipts";
             const tags_restful_api = api + "/tags";
+            const images_restful_api = api + "/images";
             const application_json = "application/json";
             const tag_x_removal = " x";
             let imageCapture;
@@ -183,7 +248,12 @@
             });
 
             $('#add-receipt').on('click', function () {
+                $('#camera-ui').hide();
                 $('#input-amount-ui').show();
+            });
+            $('#start-camera').on('click', function () {
+                $('#input-amount-ui').hide();
+                $('#camera-ui').show();
             });
             $('#save-receipt').on('click', function () {
                 console.info("save-receipt ");
@@ -215,6 +285,11 @@
                 $('#merchant').val('');
                 $('#amount').val('');
                 $('#input-amount-ui').hide();
+            });
+
+            $('#take-pic-cancel').on('click', function () {
+                console.info("take-pic-cancel ");
+                $('#camera-ui').hide();
             });
 
             $.put = function(url, data, callback, type){
@@ -263,19 +338,42 @@
                 canvas.getContext('2d').drawImage(img, 0, 0);
                 const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
                 $.ajax({
-                    url: "/images",
+                    url: images_restful_api,
                     type: "POST",
                     data: base64EncodedImageData,
                     contentType: "text/plain",
-                    success: function() {},
+                    success: function (receiptinfo, canvas) {
+                        console.info("receiptinfo" + receiptinfo);
+                        renderRecommendation(receiptinfo);
+                    },
                 })
-                    .then(response => {
-                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
-            })
+//                    .then(response => {
+//                    $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+//            })
             .always(() => console.log('request complete'));
                 // For debugging, you can uncomment this to see the frame that was captured
                 // $('BODY').append(canvas);
             });
+            }
+
+            function renderRecommendation(receiptinfo, canvas) {
+                $('#camera-ui').hide();
+                $('#merchant').val(receiptinfo.merchantName);
+                $('#amount').val(receiptinfo.amount);
+                $('#input-amount-ui').show();
+
+//                var canvas1=document.createElement('canvas');
+//                var ctx1=canvas1.getContext('2d');
+//                console.info("receiptinfo.boundingBox[2]" + receiptinfo.boundingBox[2]);
+//                console.info("receiptinfo.boundingBox[3]" + receiptinfo.boundingBox[3]);
+//                canvas1.width=receiptinfo.boundingBox[2];
+//                canvas1.height=receiptinfo.boundingBox[3];
+//                // use the extended from of drawImage to draw the
+//                // cropped area to the temp canvas
+//                canvas1.getContext('2d').drawImage(canvas, receiptinfo.boundingBox[0],receiptinfo.boundingBox[1], receiptinfo.boundingBox[2], receiptinfo.boundingBox[3]);
+                //ctx1.getContext('2d').drawImage(canvas,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
+
+              //  $('BODY').append(canvas1);
             }
 
             function addRow(receipt) {
@@ -373,10 +471,12 @@
 
 
             $(function () {
-                $('#start').on('click', startVideo);
-                $('video').on('play', () => $('#snapshot').prop('disabled', false));
-                $('#snapshot').on('click', takeSnapshot);
+                $('#start-camera').on('click', startVideo);
+                $('video').on('play', () => $('#take-pic').prop('disabled', false));
+                $('#take-pic').on('click', takeSnapshot);
             });
+
+            //<img src="snap.png" height="30"/>
 
             $(`<div class="table-top"><span>Time</span><span>Merchant</span><span>$</span><span>Tags</span></div>`)
                 .appendTo($("#receiptList"))
@@ -388,6 +488,7 @@
 <div id="container">
     <h1>My Receipts</h1>
     <div id="add-receipt">+</div>
+    <div id="start-camera">camera</div>
     <div id="input-amount-ui">
         <input id="merchant" type="text" placeholder="merchant">
         <input id="amount" type="number" placeholder="amount">
@@ -396,14 +497,16 @@
             <div id="save-receipt">save</div>
         </div>
     </div>
+    <div id="camera-ui">
+        <div id="vidwrap">
+            <video autoplay></video>
+        </div>
+        <div class="button-holder">
+            <div id="take-pic-cancel">cancel</div>
+            <div id="take-pic" disabled="true">snap</div>
+        </div>
+    </div>
     <div id="receiptList"></div>
 </div>
-<button id="start">Start Video</button>
-<button id="snapshot" disabled="true">Take a Snapshot!</button>
-<br>
-<div id="vidwrap">
-    <video autoplay></video>
-</div>
 </body>
-
 </html>

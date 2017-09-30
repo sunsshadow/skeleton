@@ -34,6 +34,20 @@ public class ReceiptDao {
                 .fetch();
     }
 
+    public List<ReceiptsRecord> insert(String merchantName, BigDecimal amount, String base64EncodedImage) {
+        ReceiptsRecord receiptsRecord = dsl
+                .insertInto(RECEIPTS, RECEIPTS.MERCHANT, RECEIPTS.AMOUNT, RECEIPTS.TAG, RECEIPTS.IMAGE)
+                .values(merchantName, amount, "", base64EncodedImage)
+                .returning(RECEIPTS.ID)
+                .fetchOne();
+
+        checkState(receiptsRecord != null && receiptsRecord.getId() != null, "Insert failed");
+
+        return dsl.selectFrom(RECEIPTS)
+                .where(RECEIPTS.ID.contains(receiptsRecord.getId()))
+                .fetch();
+    }
+
     public void tag(String tagName, int receiptNumber) {
         final ReceiptsRecord receiptsRecord = dsl.selectFrom(RECEIPTS)
                 .where(RECEIPTS.ID.eq(receiptNumber))

@@ -30,7 +30,12 @@ public class ReceiptController {
 
     @POST
     public ReceiptResponse createReceipt(@Valid @NotNull CreateReceiptRequest receipt) {
-        List<ReceiptsRecord> receiptRecords = receipts.insert(receipt.merchant, receipt.amount);
+        List<ReceiptsRecord> receiptRecords;
+        if (receipt.base64EncodedImage == null) {
+            receiptRecords = receipts.insert(receipt.merchant, receipt.amount);
+        } else {
+            receiptRecords = receipts.insert(receipt.merchant, receipt.amount, receipt.base64EncodedImage);
+        }
         return receiptRecords.stream().map(ReceiptResponse::new).collect(toList()).get(0);
     }
 
