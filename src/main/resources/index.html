@@ -241,10 +241,24 @@
             let imageCapture;
             let track;
             var boundingBox;
+            var canvasId;
+            var canvasToAppend;
 
             $.getJSON(receipts_restful_api, function (receipts) {
                 for (var idx = 0; idx < receipts.length; idx++) {
-                    addRow(receipts[idx]);
+                    //console.log("receipts[idx].image " + receipts[idx].image);
+                    if (receipts[idx].image != null) {
+                        var myImage = new Image();
+                        myImage.src = receipts[idx].image;
+
+                        const canvasTemp = document.createElement('canvas');
+                        canvasTemp.id = "created" + (Math.floor(Math.random() * 9 + 2)).toString() + "populate";
+                        canvasTemp.getContext('2d').drawImage(myImage, 0, 0);
+                        addRow(receipts[idx], canvasTemp);
+                        //canvas = canvasTemp;
+                    } else {
+                        addRow(receipts[idx]);
+                    }
                 }
             });
 
@@ -260,18 +274,25 @@
                 console.info("save-receipt ");
 
                 const myCanvas = document.getElementById("my-canvas");
-                ///const base64EncodedImageData = myCanvas.toDataURL('image/png').split(',')[1];
+                console.log("created" + canvasId.toString() + "end");
+                //const canvas3 = document.getElementById("created" + canvasId.toString() + "end");
+                console.log("canvasToAppend " + canvasToAppend);
+                canvasId = "";
+                const base64EncodedImageData = canvasToAppend.toDataURL('image/png').split(',')[1];
+                //console.log("base64EncodedImageData " + base64EncodedImageData);
+
+                myCanvas.getContext('2d').clearRect(0, 0, myCanvas.width, myCanvas.height);
 
                 var input_json = {
                     merchant: $('#merchant').val(),
-                    amount: $('#amount').val()
-                    //base64EncodedImage: base64EncodedImageData
+                    amount: $('#amount').val(),
+                    base64EncodedImage: base64EncodedImageData
                 };
                 $.ajax({
                     url: receipts_restful_api,
                     dataType: 'json',
                     type: 'POST',
-                    indexValue: {param1:myCanvas},
+                    indexValue: {param1:canvasToAppend},
                     contentType: application_json,
                     data: JSON.stringify(input_json),
                     success: function (receipt) {
@@ -279,7 +300,7 @@
                         addRow(receipt, this.indexValue.param1);
                         $('#merchant').val('');
                         $('#amount').val('');
-                        this.indexValue.param1.getContext('2d').clearRect(0, 0, this.indexValue.param1.width, this.indexValue.param1.height);
+                        //this.indexValue.param1.getContext('2d').clearRect(0, 0, this.indexValue.param1.width, this.indexValue.param1.height);
                         $('#input-amount-ui').hide();
                     },
                     error: function (jqXhr, textStatus, errorThrown) {
@@ -293,12 +314,14 @@
                 $('#merchant').val('');
                 $('#amount').val('');
                 $('#input-amount-ui').hide();
+                canvasId = ";"
             });
 
             $('#take-pic-cancel').on('click', function () {
                 console.info("take-pic-cancel ");
                 $('#camera-ui').hide();
                 disconnectVideo();
+                canvasId = "";
             });
 
             function disconnectVideo() {
@@ -344,25 +367,29 @@
             }
             function takeSnapshot() {
                 // create a CANVAS element that is same size as the image
+                canvasId = Math.floor(Math.random() * 9 + 2);
                 imageCapture.grabFrame()
                     .then(img => {
                     const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
-
+                console.log("created" + canvasId.toString() + "end");
                 const myCanvas = document.getElementById("my-canvas");
+                const canvas3 = document.createElement('canvas');
+                canvas3.id = "created" + canvasId.toString() + "end";
                 canvas.getContext('2d').drawImage(img, 0, 0);
                 const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
+                ///console.log("base64EncodedImageData 1  " + base64EncodedImageData);
                 const imgVar = img;
                 $.ajax({
                     url: images_restful_api,
                     type: "POST",
                     data: base64EncodedImageData,
-                    indexValue: {param1:img, param2:myCanvas},
+                    indexValue: {param1:img, param2:myCanvas, param3:canvas3},
                     contentType: "text/plain",
                     success: function (receiptinfo) {
                         console.info("receiptinfo" + receiptinfo);
-                        renderRecommendation(receiptinfo, this.indexValue.param1, this.indexValue.param2);
+                        renderRecommendation(receiptinfo, this.indexValue.param1, this.indexValue.param2, this.indexValue.param3);
                     },
                 })
 //                    .then(response => {
@@ -379,7 +406,7 @@
             });
             }
 
-            function renderRecommendation(receiptinfo, img, canvas2) {
+            function renderRecommendation(receiptinfo, img, canvas2, canvas3) {
                 $('#camera-ui').hide();
                 $('#merchant').val(receiptinfo.merchantName);
                 $('#amount').val(receiptinfo.amount);
@@ -391,6 +418,13 @@
                 canvas2.width = receiptinfo.boundingBox[2]
                 canvas2.height = receiptinfo.boundingBox[3]
                 canvas2.getContext('2d').drawImage(img,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
+
+                //canvas3.getContext('2d').clearRect(0, 0, canvas3.width, canvas3.height);
+                canvas3.width = receiptinfo.boundingBox[2]
+                canvas3.height = receiptinfo.boundingBox[3]
+                canvas3.getContext('2d').drawImage(img,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
+
+                canvasToAppend = canvas3;
                 //ctx1.getContext('2d').drawImage(canvas,receiptinfo.boundingBox[0],receiptinfo.boundingBox[1],receiptinfo.boundingBox[2],receiptinfo.boundingBox[3],0,0,receiptinfo.boundingBox[2],receiptinfo.boundingBox[3]);
 
                // $('BODY').append(canvas2);
@@ -453,11 +487,41 @@
                         tagBlob += `<div id="${receipt.id + "sep" + idx}" class="tagValue">${receipt.tags[idx]}${tag_x_removal}</div>`;
                     }
                 }
+                //console.info("receipt.imagee" + receipt.image);
+
+//                if (receipt.image != null) {
+//                    var myImage = new Image();
+//                    myImage.src = receipt.image;
+//
+//                    const canvasTemp = document.createElement('canvas');
+//                    canvasTemp.id = "created" + (Math.floor(Math.random() * 9 + 2)).toString() + "end";
+//                    canvasTemp.getContext('2d').drawImage(myImage, 0, 0);
+//                    canvas = canvasTemp;
+//                }
+
+
                 console.info("receipt.merchant " + receipt.merchant);
-                console.info("receipt.amount " + receipt.amount);
-                $(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span></div>`)
+                console.info("canvas" + canvas);
+                $('BODY').append(canvas);
+
+                $(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span></div>`).append(canvas)
                 //$(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span><span class="snap">${canvas}</span></div>`)
                     .appendTo($("#receiptList"));
+
+                //var canvas = $('<canvas width="500" height="500"></canvas>');
+                $('#receiptList').append(canvas);
+
+
+                /// initialize
+                //if (typeof G_vmlCanvasManager !== 'undefined')
+                //    G_vmlCanvasManager.initElement(canvas[0]);
+
+//                canvas.attr({
+//                    id: elementID
+//                }).css({
+//                    width: 200 + 'px',
+//                    height: 200 + 'px'
+//                }).appendTo($("#receiptList"));
             }
 
             function removeTag(receiptId, tag) {

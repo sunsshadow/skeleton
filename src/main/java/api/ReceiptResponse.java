@@ -34,7 +34,7 @@ public class ReceiptResponse {
     List<String> tags;
 
     @JsonProperty
-    @Optional
+//    @Optional
     String image;
 
     public ReceiptResponse(ReceiptsRecord dbRecord) {

@@ -42,6 +42,7 @@ public class ReceiptImageController {
      */
     @POST
     public ReceiptSuggestionResponse parseReceipt(final @NotEmpty String base64EncodedImage) throws Exception {
+        //System.out.print("receipt.base64EncodedImage " + base64EncodedImage.toString() + "hiiiii");
         Image img = Image.newBuilder().setContent(ByteString.copyFrom(Base64.getDecoder().decode(base64EncodedImage))).build();
         AnnotateImageRequest request = this.requestBuilder.setImage(img).build();
 
