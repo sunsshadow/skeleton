@@ -10,7 +10,7 @@
         }
         #receiptList {
             clear: both;
-            width: 500px;
+            width: 400px;
         }
         .receipt {
             background-color: lightpink;
@@ -242,7 +242,7 @@
             let track;
             var boundingBox;
             var canvasId;
-            var canvasToAppend;
+            let canvasToAppend;
 
             $.getJSON(receipts_restful_api, function (receipts) {
                 for (var idx = 0; idx < receipts.length; idx++) {
@@ -253,16 +253,21 @@
                         myImage.src = "data:image/png;base64," + receipts[idx].image;
                         const canvasTemp = document.createElement('canvas');
                         canvasTemp.id = "created" + Date.now().toString() + "populate";
+//                        canvasTemp.width = 200;
+//                        canvasTemp.height)
                         let ctx = canvasTemp.getContext('2d');
                         myImage.onload = function() {
                             console.log("Drawing image " + canvasTemp.id);
+                            canvasTemp.width = myImage.width;
+                            canvasTemp.height = myImage.height;
                             //console.log(myImage)
-                            ctx.drawImage(myImage, 10, 10);
+                            ctx.drawImage(myImage, 0, 0);
                         }
                         myImage.onerror = function(err) {
                             console.log("Something went wrong!" + err);
                         }
                         console.log("Created canvas " + canvasTemp.id);
+                        //$('BODY').append(canvas1);
                         addRow(receipts[idx], canvasTemp);
                         //canvas = canvasTemp;
 //                        var myImage = new Image();
@@ -327,6 +332,9 @@
                     amount: $('#amount').val(),
                     base64EncodedImage: base64EncodedImageData
                 };
+
+
+                //canvasToAppend.getContext('2d').clearRect(0, 0, canvas2.width, canvas2.height);
                 $.ajax({
                     url: receipts_restful_api,
                     dataType: 'json',

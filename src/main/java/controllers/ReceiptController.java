@@ -31,7 +31,6 @@ public class ReceiptController {
     @POST
     public ReceiptResponse createReceipt(@Valid @NotNull CreateReceiptRequest receipt) {
         List<ReceiptsRecord> receiptRecords;
-        //System.out.print("receipt.base64EncodedImage " + receipt.base64EncodedImage.toString() + "heeeeey");
         if (receipt.base64EncodedImage == null) {
             receiptRecords = receipts.insert(receipt.merchant, receipt.amount);
         } else {
@@ -43,7 +42,6 @@ public class ReceiptController {
     @GET
     public List<ReceiptResponse> getReceipts() {
         List<ReceiptsRecord> receiptRecords = receipts.getAllReceipts();
-        //System.out.print("receiptRecords " + receiptRecords.toString() + "over");
 
         if (receiptRecords.size() > 0) {
             System.out.print("receiptRecords " + receiptRecords.stream().map(ReceiptResponse::new).collect(toList()).get(0).toString()+ "image over");
