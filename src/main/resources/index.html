@@ -247,18 +247,54 @@
             $.getJSON(receipts_restful_api, function (receipts) {
                 for (var idx = 0; idx < receipts.length; idx++) {
                     //console.log("receipts[idx].image " + receipts[idx].image);
-                    if (receipts[idx].image != null) {
-                        var myImage = new Image();
-                        myImage.src = receipts[idx].image;
 
+                    if (receipts[idx].image != null) {
+                        let myImage = new Image();
+                        myImage.src = "data:image/png;base64," + receipts[idx].image;
                         const canvasTemp = document.createElement('canvas');
-                        canvasTemp.id = "created" + (Math.floor(Math.random() * 9 + 2)).toString() + "populate";
-                        canvasTemp.getContext('2d').drawImage(myImage, 0, 0);
+                        canvasTemp.id = "created" + Date.now().toString() + "populate";
+                        let ctx = canvasTemp.getContext('2d');
+                        myImage.onload = function() {
+                            console.log("Drawing image " + canvasTemp.id);
+                            //console.log(myImage)
+                            ctx.drawImage(myImage, 10, 10);
+                        }
+                        myImage.onerror = function(err) {
+                            console.log("Something went wrong!" + err);
+                        }
+                        console.log("Created canvas " + canvasTemp.id);
                         addRow(receipts[idx], canvasTemp);
                         //canvas = canvasTemp;
+//                        var myImage = new Image();
+//                        myImage.src = "data:image/png;base64," + receipts[idx].image;
+//                        canvasTemp = document.createElement('canvas');
+//                        canvasTemp.id = "created" + Date.now().toString() + "populate";
+//                        var ctx = canvasTemp.getContext('2d');
+//                        myImage.onload = function() {
+//                            ctx.drawImage(myImage, 0, 0);
+//                        }
+//                        myImage.onerror = function(err) {
+//                            console.log("Something went wrong!" + err);
+//                        }
+//                        console.log("Created canvas " + canvasTemp.id);
+//                        addRow(receipts[idx], canvasTemp);
+//                        //canvas = canvasTemp;
                     } else {
                         addRow(receipts[idx]);
                     }
+
+//                    if (receipts[idx].image != null) {
+//                        var myImage = new Image();
+//                        myImage.src = receipts[idx].image;
+//
+//                        const canvasTemp = document.createElement('canvas');
+//                        canvasTemp.id = "created" + (Math.floor(Math.random() * 9 + 2)).toString() + "populate";
+//                        canvasTemp.getContext('2d').drawImage(myImage, 0, 0);
+//                        addRow(receipts[idx], canvasTemp);
+//                        //canvas = canvasTemp;
+//                    } else {
+//                        addRow(receipts[idx]);
+//                    }
                 }
             });
 
@@ -274,11 +310,14 @@
                 console.info("save-receipt ");
 
                 const myCanvas = document.getElementById("my-canvas");
-                console.log("created" + canvasId.toString() + "end");
+                //console.log("created" + canvasId.toString() + "end");
                 //const canvas3 = document.getElementById("created" + canvasId.toString() + "end");
-                console.log("canvasToAppend " + canvasToAppend);
+                //console.log("canvasToAppend " + canvasToAppend);
                 canvasId = "";
-                const base64EncodedImageData = canvasToAppend.toDataURL('image/png').split(',')[1];
+                base64EncodedImageData = null
+                if (canvasToAppend != null) {
+                    base64EncodedImageData = canvasToAppend.toDataURL('image/png').split(',')[1];
+                }
                 //console.log("base64EncodedImageData " + base64EncodedImageData);
 
                 myCanvas.getContext('2d').clearRect(0, 0, myCanvas.width, myCanvas.height);
@@ -367,7 +406,7 @@
             }
             function takeSnapshot() {
                 // create a CANVAS element that is same size as the image
-                canvasId = Math.floor(Math.random() * 9 + 2);
+                canvasId = Date.now().toString();
                 imageCapture.grabFrame()
                     .then(img => {
                     const canvas = document.createElement('canvas');
@@ -502,14 +541,14 @@
 
                 console.info("receipt.merchant " + receipt.merchant);
                 console.info("canvas" + canvas);
-                $('BODY').append(canvas);
+                //$('BODY').append(canvas);
 
                 $(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span></div>`).append(canvas)
                 //$(`<div class="receipt"><span class="time">${timeSince(receipt.time)}</span><span class="merchant">${receipt.merchant}</span><span class="amount">${parseFloat(receipt.amount).toFixed(2)}</span><span class="tags">${tagBlob}<div id="${receipt.id}" class="add-tag">Add +</div></span><span class="snap">${canvas}</span></div>`)
                     .appendTo($("#receiptList"));
 
                 //var canvas = $('<canvas width="500" height="500"></canvas>');
-                $('#receiptList').append(canvas);
+               // $('#receiptList').append(canvas);
 
 
                 /// initialize
