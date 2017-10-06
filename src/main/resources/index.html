@@ -232,12 +232,14 @@
         // This is the idiomatic way to ensure that JQuery does not
         // execute until the page has loaded
         $(function () {
-            const api = "http://localhost:8080";
+            //const api = "http://localhost:8080";
+            const api = "";
             const receipts_restful_api = api + "/receipts";
             const tags_restful_api = api + "/tags";
             const images_restful_api = api + "/images";
             const application_json = "application/json";
             const tag_x_removal = " x";
+            const canvasImgHeight = 300;
             let imageCapture;
             let track;
             var boundingBox;
@@ -258,10 +260,18 @@
                         let ctx = canvasTemp.getContext('2d');
                         myImage.onload = function() {
                             console.log("Drawing image " + canvasTemp.id);
-                            canvasTemp.width = myImage.width;
-                            canvasTemp.height = myImage.height;
+
+                            let ratio = myImage.height/myImage.width;
+                            let canvasWidth = canvasImgHeight/ratio;
+                            canvasTemp.width = canvasWidth;
+                            canvasTemp.height = canvasImgHeight;
+                            //canvasTemp.width = myImage.width;
+                            //canvasTemp.height = myImage.height;
+                            ctx.drawImage(myImage, 0, 0, myImage.width,    myImage.height,     // source rectangle
+                                0, 0, canvasTemp.width, canvasTemp.height); // destination rectangle
+                            //ctx.drawImage(myImage, 0, 0);
                             //console.log(myImage)
-                            ctx.drawImage(myImage, 0, 0);
+                            //ctx.drawImage(myImage, 0, 0);
                         }
                         myImage.onerror = function(err) {
                             console.log("Something went wrong!" + err);
